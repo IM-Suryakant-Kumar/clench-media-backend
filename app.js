@@ -11,10 +11,12 @@ const rateLimiter = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 
 // database
-const connectDB = require("./db");
+const connectDB = require("./db/connect");
 // routers
+const authRouter = require("./routes/authRoute");
 // middleware
-const { notFoundMiddleware, errorHandlerMiddleware } = require("./middleware");
+const notFoundMiddleware = require("./middleware/not-found")
+const errorHandlerMiddleware = require("./middleware/error-handler")
 
 app.set("trust proxy", 1);
 app.use(
@@ -30,12 +32,14 @@ app.use(xss());
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(notFoundMiddleware)
-app.use(errorHandlerMiddleware)
+app.use("/api/v1/auth", authRouter);
+
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
 
 const start = async () => {
 	try {
-		await connectDB(process.env.MONGO_URI)
+		await connectDB(process.env.MONGO_URI);
 		app.listen(process.env.PORT, () => {
 			console.log(`Server is listening on port ${process.env.PORT}...`);
 		});
